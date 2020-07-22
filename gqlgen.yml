@@ -57,5 +57,7 @@ models:
   User:
     model: model.User
     fields:
+      comments:
+        resolver: true
       premiumtype:
         resolver: true

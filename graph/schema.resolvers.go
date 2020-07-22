@@ -5,40 +5,73 @@ package graph
 
 import (
 	"context"
-	"errors"
-	"fmt"
-
 	"github.com/Raven57/belajargraphql/graph/generated"
 	"github.com/Raven57/belajargraphql/graph/model"
 )
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	return users, nil
+	//var restrictions []*model.User
+	//
+	//err := r.DB.Model(&restrictions).Select()
+	//fmt.Println(err)
+	//if err != nil {
+	//
+	//	return nil, errors.New("Failed to query")
+	//}
+
+	return r.UsersRepo.GetAllUsers()
 }
 
 func (r *queryResolver) Premiumtypes(ctx context.Context) ([]*model.Premiumtype, error) {
-	return premiumtypes, nil
+
+	return r.PremiumtypesRepo.GetAllPremiums()
+}
+
+func (r *queryResolver) Comments(ctx context.Context) ([]*model.Comment, error) {
+	return r.CommentsRepo.GetAllComments()
 }
 
 func (r *userResolver) Premiumtype(ctx context.Context, obj *model.User) (*model.Premiumtype, error) {
-	prem := new(model.Premiumtype)
+	//prem := new(model.Premiumtype)
+	//
+	//for _, p := range premiumtypes {
+	//	if p.ID == obj.PremiumID {
+	//		prem = p
+	//		break
+	//	}
+	//}
+	//
+	//if prem == nil {
+	//	return nil, nil
+	//}
+	//
+	//return prem, nil
 
-	for _, p := range premiumtypes {
-		if p.ID == obj.PremiumID {
-			prem = p
-			break
-		}
-	}
+	//var restrictions *model.Premiumtype
+	//
+	//err := r.DB.Model(&restrictions).Where("id=?", obj.PremiumID).First()
+	//fmt.Println(err)
+	//if err != nil {
+	//
+	//	return nil, errors.New("Failed to query")
+	//}
 
-	if prem == nil {
-		return nil, errors.New("premium type tak ade")
-	}
-
-	return prem, nil
+	return r.PremiumtypesRepo.GetPremiumByID(obj.PremiumID)
 }
 
 func (r *userResolver) Comments(ctx context.Context, obj *model.User) ([]*model.Comment, error) {
-	panic(fmt.Errorf("not implemented"))
+	//var com []*model.Comment
+	//
+	//err := r.DB.Model(&com).Where("id=?", obj.ID).Select()
+	//if err != nil {
+	//	return nil, nil
+	//}
+	//
+	//if com == nil {
+	//	return nil, nil
+	//}
+	//return com, nil
+	return r.CommentsRepo.CommentsByUserID(obj.ID)
 }
 
 // Query returns generated.QueryResolver implementation.
@@ -49,37 +82,3 @@ func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var premiumtypes = []*model.Premiumtype{
-	{
-		ID:   "1",
-		Text: "Premium",
-	},
-	{
-		ID:   "2",
-		Text: "Normal",
-	},
-}
-var users = []*model.User{
-	{
-		ID:        "1",
-		Name:      "Abc",
-		PremiumID: "1",
-	},
-	{
-		ID:        "2",
-		Name:      "Nomor dua",
-		PremiumID: "2",
-	},
-	{
-		ID:        "3",
-		Name:      "Nomor tiga",
-		PremiumID: "2",
-	},
-}

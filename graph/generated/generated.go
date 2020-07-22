@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Comments     func(childComplexity int) int
 		Premiumtypes func(childComplexity int) int
 		Users        func(childComplexity int) int
 	}
@@ -71,6 +72,7 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Premiumtypes(ctx context.Context) ([]*model.Premiumtype, error)
+	Comments(ctx context.Context) ([]*model.Comment, error)
 }
 type UserResolver interface {
 	Premiumtype(ctx context.Context, obj *model.User) (*model.Premiumtype, error)
@@ -126,6 +128,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Premiumtype.Text(childComplexity), true
+
+	case "Query.comments":
+		if e.complexity.Query.Comments == nil {
+			break
+		}
+
+		return e.complexity.Query.Comments(childComplexity), true
 
 	case "Query.premiumtypes":
 		if e.complexity.Query.Premiumtypes == nil {
@@ -252,6 +261,7 @@ type Premiumtype {
 type Query {
   users : [User!]!
   premiumtypes: [Premiumtype!]!
+  comments: [Comment!]!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -546,6 +556,40 @@ func (ec *executionContext) _Query_premiumtypes(ctx context.Context, field graph
 	res := resTmp.([]*model.Premiumtype)
 	fc.Result = res
 	return ec.marshalNPremiumtype2ᚕᚖgithubᚗcomᚋRaven57ᚋbelajargraphqlᚋgraphᚋmodelᚐPremiumtypeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Comments(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚕᚖgithubᚗcomᚋRaven57ᚋbelajargraphqlᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1957,6 +2001,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_premiumtypes(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "comments":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_comments(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

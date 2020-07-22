@@ -24,4 +24,5 @@ type Premiumtype {
 type Query {
   users : [User!]!
   premiumtypes: [Premiumtype!]!
+  comments: [Comment!]!
 }
